@@ -24,7 +24,6 @@
                     <li>
                         <a class="btn btn-outline-primary px-3 mr-3" href="{% url 'djangoapp:index' %}">Home</a>
                         <a class="btn btn-outline-primary px-3 mr-3" href="#">About Us</a>
-                        <a class="btn btn-outline-primary px-3 mr-3" href="#">Contact Us</a>
                     </li>
                 </ul>
             </div>
@@ -35,8 +34,15 @@
             Welcome to Best Cars dealership, home to the best cars in North America. We sell domestic and imported cars at reasonable prices.
         </h3>
 
-        <div class="card-footer bg-transparent border-success">Footer</div>
-
+        <!-- Footer -->
+        <footer style="margin-top:39vh;" class="bg-white mb-0 h-25 text-center text-white">
+            <div class="text-center h-100 mb-0 p-3" style="background-color: rgba(0, 0, 0, 0.5);">
+                <p class="mt-3">XYZ InfoTech</p>
+                <p>© 2020 Copyright</p>
+                <a class="btn btn-outline-light mx-auto px-3 mr-3" href="{% url 'djangoapp:contact' %}">Contact Us</a>
+            </div>
+        </footer>
+        
     </body>
 
 </html>
