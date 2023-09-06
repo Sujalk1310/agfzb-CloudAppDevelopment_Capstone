@@ -22,22 +22,30 @@
                 </div>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
-                        <a class="btn btn-outline-primary px-3 mr-3" href="#">Home</a>
+                        <a class="btn btn-outline-primary px-3 mr-3" href="{% url 'djangoapp:index' %}">Home</a>
                         <a class="btn btn-outline-primary px-3 mr-3" href="{% url 'djangoapp:about' %}">About Us</a>
-                        <a class="btn btn-outline-primary px-3 mr-3" href="">Contact Us</a>
+                        <a class="btn btn-outline-primary px-3 mr-3" href="#">Contact Us</a>
                     </li>
                 </ul>
             </div>
         </nav>
 
-        <h1 class="text-center w-100 mt-5">Dealership Review Table</h1>
-        <table>
-            <thead>
-                
-            <thead>
-        </table>
+        <h1 class="text-center w-100 mt-5">Contact Us</h1>
+        <div class="card w-75 mt-5 mx-auto">
+            <div class="card-body mx-auto">
+                <h3 class="card-title mt-2 text-center">XYZ Infotech.</h3>
+                <div class="row mt-5">
+                    <p class="col card-text text-center font-weight-bold">Address: </p>
+                    <p class="col text-center">8026 Homenick Creek, Colorado, USA</p>
+                </div>
+                <div class="row mt-3">
+                    <p class="col card-text text-center font-weight-bold">Telephone No: </p>
+                    <a class="col text-center" href="tel:+18404589578">+18404589578</a>
+                </div> 
+            </div>
+        </div>
 
-        <div class="card-footer bg-transparent border-success">Footer</div>
+        <div class="card-footer border">Footer</div>
 
     </body>
 
