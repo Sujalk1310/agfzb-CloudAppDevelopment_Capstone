@@ -6,6 +6,30 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
     <body>
-    <!--Add a registration form here -->
+        <div class="form-group w-75 mt-5 mx-auto">
+            <form action="{% url 'djangoapp:registration' %}" method="post">
+                <div class="container">
+                <h1>Sign Up</h1>
+                <hr>
+                <div class="d-flex flex-column">
+                    <label for="username"><b>User Name</b></label>
+                    <input class="mb-2 form-control" type="text" placeholder="Enter User Name: " name="username" required>
+                    <label for="firstname"><b>First Name</b></label>
+                    <input class="mb-2 form-control" type="text" placeholder="Enter First Name: " name="firstname" required>
+                    <label for="lastname"><b>Last Name</b></label>
+                    <input class="mb-2 form-control" type="text" placeholder="Enter Last Name: " name="lastname" required>
+                    <label for="psw"><b>Password</b></label>
+                    <input class="mb-4 form-control" type="password" placeholder="Enter Password: " name="psw" required>
+                    <div>
+                        {% csrf_token %}
+                        <button class="btn btn-dark form-control" type="submit">Sign Up</button>
+                    </div>
+                    <div>
+                        <a class="link text-center form-control mt-2 border-none" href="{% url 'djangoapp:index' %}">Already have an account? Log In</a>
+                    </div>
+                </div>
+                </div>
+            </form>
+        </div>
     </body>
 </html>
