@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
-# from .models import related models
+from .models import CarModel
 from .restapis import *
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
@@ -99,13 +99,9 @@ def get_dealerships(request):
         url = "https://kulshrestha4-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
-        # Concat all dealer's short name
-        dealer_names = ','.join([dealer.short_name for dealer in dealerships])
-        # Return a list of dealer short name
         context = {
-            "dealer_names": dealer_names,
-            }
-        return  HttpResponse(dealer_names)
+            "dealerships": dealerships,
+        }
     return render(request, 'djangoapp/index.html', context)
 
 
@@ -113,18 +109,22 @@ def get_dealer_details(request, dealer_id):
     if request.method == "GET":
         url = "https://kulshrestha4-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
         # Get dealers from the URL
-        dealerships = get_dealer_reviews_from_cf(url, id=dealer_id)
-        # Concat all dealer's short name
-        reviews = ',\n'.join([f"{dealer.review}\n Sentiment: {dealer.sentiment}" for dealer in dealerships])
-        # Return a list of dealer short named
+        reviews = get_dealer_reviews_from_cf(url, id=dealer_id)
         context = {
-            "reviews": reviews,
-            }
-        return HttpResponse(reviews)
-    return render(request, 'djangoapp/index.html', context)
+            "reviews_list": reviews,
+            "id": dealer_id
+        }
+    return render(request, 'djangoapp/dealer_details.html', context)
 
 @csrf_exempt 
 def add_review(request, dealer_id):
+    if request.method == 'GET':
+        Cars = CarModel.objects.filter(dealer_id=dealer_id)
+        context= {
+            "id": dealer_id,
+            "Cars": Cars
+        }
+        return render(request, 'djangoapp/add_review.html', context)
     if request.method == 'POST':
 
         url = "https://kulshrestha4-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
@@ -155,12 +155,15 @@ def add_review(request, dealer_id):
             headers = {'Content-Type': 'application/json'}
 
             # Send a POST request with JSON data
-            response = requests.post(url, json_payload=json_payload, headers=headers)
+            response = requests.post(url, json=json_payload, headers=headers)
 
             if response.status_code == 200:
                 # Assuming the external API returns a JSON response
                 response_data = response.json()
-                return JsonResponse(response_data)
+                context  = {
+                    "message": response_data
+                }
+                return redirect("djangoapp:dealer_details", dealer_id=dealer_id)
             else:
                 return JsonResponse({'error': 'Failed to post review to the external API'})
         except Exception as e:
