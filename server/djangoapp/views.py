@@ -3,11 +3,12 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
-from .restapis import get_dealers_from_cf
+from .restapis import *
 from django.contrib.auth import login, logout, authenticate
 from django.contrib import messages
 from datetime import datetime
 import logging
+from django.views.decorators.csrf import csrf_exempt
 import json
 
 # Get an instance of a logger
@@ -43,6 +44,7 @@ def login_request(request):
         if user is not None:
             # If user is valid, call login method to login current user
             login(request, user)
+            request.session['is_authenticated'] = True
             return redirect('djangoapp:index')
         else:
             # If not, return to login page again
@@ -55,6 +57,8 @@ def logout_request(request):
     print("Log out the user `{}`".format(request.user.username))
     # Logout user in the request
     logout(request)
+    if 'is_authenticated' in request.session:
+        del request.session['is_authenticated']
     # Redirect user back to course list view
     return redirect('djangoapp:index')
 
@@ -92,20 +96,59 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
-        url = "https://us-south.functions.appdomain.cloud/api/v1/web/5b681ebc-bba6-4747-9b99-71fb0d5bcf22/dealership-package/get-dealership/dealerships/dealer-get"
+        url = "https://kulshrestha4-3000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/dealerships/get"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
         # Concat all dealer's short name
-        dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
+        dealer_names = ','.join([dealer.short_name for dealer in dealerships])
         # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        context = {
+            "dealer_names": dealer_names,
+            }
+        return  HttpResponse(dealer_names)
+    return render(request, 'djangoapp/index.html', context)
 
 
-# Create a `get_dealer_details` view to render the reviews of a dealer
-# def get_dealer_details(request, dealer_id):
-# ...
+def get_dealer_details(request, dealer_id):
+    if request.method == "GET":
+        url = "https://kulshrestha4-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/get_reviews"
+        # Get dealers from the URL
+        dealerships = get_dealer_reviews_from_cf(url, id=dealer_id)
+        # Concat all dealer's short name
+        reviews = ',\n'.join([f"{dealer.review}\n Sentiment: {dealer.sentiment}" for dealer in dealerships])
+        # Return a list of dealer short named
+        context = {
+            "reviews": reviews,
+            }
+        return HttpResponse(reviews)
+    return render(request, 'djangoapp/index.html', context)
 
-# Create a `add_review` view to submit a review
-# def add_review(request, dealer_id):
-# ...
+@csrf_exempt 
+def add_review(request, dealer_id):
+    if request.method == 'POST':
+
+        url = "https://kulshrestha4-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
+        
+        name = request.get('name')
+        dealership = request.get('dealership')
+        review = request.get('review')
+        purchase = request.get('purchase')
+        purchase_date = request.get('purchase_date')
+        car_make = request.get('car_make')
+        car_model = request.get('car_model')
+        car_year = request.get('car_year')
+    
+        json_payload= {
+            'id': dealer_id, 
+            'name': name, 
+            'dealership': dealership, 
+            'review': review, 
+            'purchase': purchase, 
+            'purchase_date': purchase_date, 
+            'car_make': car_make, 
+            'car_model': car_model, 
+            'car_year': car_year
+        }
+        response = post_request(url, json_payload, id=dealer_id)
+        return HttpResponse(response)
 
