@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
@@ -129,16 +129,16 @@ def add_review(request, dealer_id):
 
         url = "https://kulshrestha4-5000.theiadocker-0-labs-prod-theiak8s-4-tor01.proxy.cognitiveclass.ai/api/post_review"
         
-        name = request.get('name')
-        dealership = request.get('dealership')
-        review = request.get('review')
-        purchase = request.get('purchase')
-        purchase_date = request.get('purchase_date')
-        car_make = request.get('car_make')
-        car_model = request.get('car_model')
-        car_year = request.get('car_year')
+        name = request.POST.get('name')
+        dealership = request.POST.get('dealership')
+        review = request.POST.get('review')
+        purchase = request.POST.get('purchase')
+        purchase_date = request.POST.get('purchase_date')
+        car_make = request.POST.get('car_make')
+        car_model = request.POST.get('car_model')
+        car_year = request.POST.get('car_year')
     
-        json_payload= {
+        json_payload = {
             'id': dealer_id, 
             'name': name, 
             'dealership': dealership, 
@@ -149,6 +149,23 @@ def add_review(request, dealer_id):
             'car_model': car_model, 
             'car_year': car_year
         }
-        response = post_request(url, json_payload, id=dealer_id)
-        return HttpResponse(response)
+
+        try:
+            # Set the Content-Type header to 'application/json'
+            headers = {'Content-Type': 'application/json'}
+
+            # Send a POST request with JSON data
+            response = requests.post(url, json_payload=json_payload, headers=headers)
+
+            if response.status_code == 200:
+                # Assuming the external API returns a JSON response
+                response_data = response.json()
+                return JsonResponse(response_data)
+            else:
+                return JsonResponse({'error': 'Failed to post review to the external API'})
+        except Exception as e:
+            # Handle any exceptions that may occur during the request
+            return JsonResponse({'error': f'An error occurred: {str(e)}'})
+
+    return JsonResponse({'error': 'Only POST requests are allowed'})
 
